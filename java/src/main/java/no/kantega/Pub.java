@@ -1,69 +1,21 @@
 package no.kantega;
 
+import no.kantega.menu.Menu;
+
+import java.util.Map;
+
 public class Pub {
+    private static final float STUDENT_DISCOUNT = 0.9F;
 
-
-    public static final String ONE_BEER = "hansa";
-    public static final String ONE_CIDER = "grans";
-    public static final String A_PROPER_CIDER = "strongbow";
-    public static final String GT = "gt";
-    public static final String BACARDI_SPECIAL = "bacardi_special";
-
-    public int computeCost(String drink, boolean student, int amount) {
-
-        if (amount > 2 && (drink == GT || drink == BACARDI_SPECIAL)) {
-            throw new RuntimeException("Too many drinks, max 2.");
+    public float computeCost(Map<Menu, Integer> items, boolean student) {
+        float price = 0F;
+        for (var item : items.keySet()) {
+            if (item.getType().equals(Menu.Type.SPIRIT) && items.get(item) > 2) // TODO: Ask client for drink limit clarification
+                throw new RuntimeException("Too many items, max 2.");
+            if (student && item.getType().equals(Menu.Type.BEER))
+                price += Math.round(item.getPrice() * STUDENT_DISCOUNT) * items.get(item);
+            else price += item.getPrice() * items.get(item);
         }
-        int price;
-        if (drink.equals(ONE_BEER)) {
-            price = 74;
-        }
-        else if (drink.equals(ONE_CIDER)) {
-            price = 103;
-        }
-        else if (drink.equals(A_PROPER_CIDER)) price = 110;
-        else if (drink.equals(GT)) {
-            price = ingredient6() + ingredient5() + ingredient4();
-        }
-        else if (drink.equals(BACARDI_SPECIAL)) {
-            price = ingredient6()/2 + ingredient1() + ingredient2() + ingredient3();
-        }
-        else {
-            throw new RuntimeException("No such drink exists");
-        }
-        if (student && (drink == ONE_CIDER || drink == ONE_BEER || drink == A_PROPER_CIDER)) {
-            price = price - price/10;
-        }
-        return price*amount;
-    }
-
-    //one unit of rum
-    private int ingredient1() {
-        return 65;
-    }
-
-    //one unit of grenadine
-    private int ingredient2() {
-        return 10;
-    }
-
-    //one unit of lime juice
-    private int ingredient3() {
-        return 10;
-    }
-    
-    //one unit of green stuff
-    private int ingredient4() {
-        return 10;
-    }
-
-    //one unit of tonic water
-    private int ingredient5() {
-        return 20;
-    }
-
-    //one unit of gin
-    private int ingredient6() {
-        return 85;
+        return price;
     }
 }
