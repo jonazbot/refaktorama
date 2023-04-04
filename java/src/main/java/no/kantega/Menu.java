@@ -1,4 +1,4 @@
-package no.kantega.menu;
+package no.kantega;
 
 public enum Menu {
     RUM("Unknown", Type.INGREDIENT, 65),
@@ -6,9 +6,9 @@ public enum Menu {
     LIME_JUICE("Lime Juice", Type.INGREDIENT,10),
     GREEN_STUFF("Green Stuff", Type.INGREDIENT,10),
     TONIC_WATER("Tonic Water", Type.INGREDIENT,20),
-    HANSA("Hansa", Type.BEER, 74),
-    GRANS("Grans", Type.BEER, 103),
-    STRONGBROW("Strongbow", Type.BEER, 110),
+    HANSA("Hansa", Type.BEER_OR_CIDER, 74),
+    GRANS("Grans", Type.BEER_OR_CIDER, 103),
+    STRONGBROW("Strongbow", Type.BEER_OR_CIDER, 110),
     GIN("Gin", Type.SPIRIT, 85),
     GT("GT", Type.SPIRIT, GIN.price + TONIC_WATER.price + GREEN_STUFF.price),
     BACARDI_SPECIAL("Bacardi Special", Type.SPIRIT, GIN.getPrice()/2 + RUM.price + GRENADINE.price + LIME_JUICE.price);
@@ -28,7 +28,7 @@ public enum Menu {
     public int getPrice() { return this.price; }
 
     public enum Type {
-        BEER,
+        BEER_OR_CIDER,
         SPIRIT,
         INGREDIENT
     }

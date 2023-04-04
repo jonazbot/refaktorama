@@ -1,21 +1,35 @@
 package no.kantega;
 
-import no.kantega.menu.Menu;
-
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Pub {
-    private static final float STUDENT_DISCOUNT = 0.9F;
+    private final List<ReceiptItem> customerReceipt;
 
-    public float computeCost(Map<Menu, Integer> items, boolean student) {
-        float price = 0F;
-        for (var item : items.keySet()) {
-            if (item.getType().equals(Menu.Type.SPIRIT) && items.get(item) > 2) // TODO: Ask client for drink limit clarification
-                throw new RuntimeException("Too many items, max 2.");
-            if (student && item.getType().equals(Menu.Type.BEER))
-                price += Math.round(item.getPrice() * STUDENT_DISCOUNT) * items.get(item);
-            else price += item.getPrice() * items.get(item);
+    public Pub() {
+        this.customerReceipt = new ArrayList<>();
+    }
+
+    public void order(Menu item, int numOfItems, Discount discount) {
+        if (item.getType().equals(Menu.Type.SPIRIT) && numOfItems > 2) // TODO: Ask client for drink limit clarification
+            throw new RuntimeException("Too many items, max 2.");
+        if (discount.isValidForItem(item)) {
+            for (int n = 0; n < numOfItems; ++n) {
+                customerReceipt.add(new ReceiptItem(item, discount));
+            }
         }
-        return price;
+        else throw new RuntimeException(item + " does not qualify for " + discount.getName());
+    }
+
+    float computeBill() {
+        float total = 0F;
+        for (var item : this.customerReceipt) {
+            total += item.computeItemCost();
+        }
+        return total;
+    }
+
+    public float addTips(float total, float tips) {
+        return total + tips;
     }
 }

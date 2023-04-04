@@ -1,6 +1,5 @@
 package no.kantega;
 
-import no.kantega.menu.Menu;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -8,8 +7,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import java.util.Map;
 
 @DisplayName("Pub spec")
 public class PubPricesTest {
@@ -24,36 +21,36 @@ public class PubPricesTest {
     @Test
     @DisplayName("When we order one beer, then the price is 74 kr.")
     public void oneBeerTest() {
-        float actualPrice = pub.computeCost(Map.of(Menu.HANSA, 1), false);
-        assertEquals(74, actualPrice);
+        pub.order(Menu.HANSA, 1, Discount.NO_DISCOUNT);
+        assertEquals(74, pub.computeBill());
     }
 
     @Test
     @DisplayName("When we order one cider, then the price is 103 kr.")
     public void testCidersAreCostly() {
-        float actualPrice = pub.computeCost(Map.of(Menu.GRANS, 1), false);
-        assertEquals(103, actualPrice);
+        pub.order(Menu.GRANS, 1, Discount.NO_DISCOUNT);
+        assertEquals(103, pub.computeBill());
     }
 
     @Test
     @DisplayName("When we order a proper cider, then the price is 110 kr.")
     public void testProperCidersAreEvenMoreExpensive() {
-        float actualPrice = pub.computeCost(Map.of(Menu.STRONGBROW, 1), false);
-        assertEquals(110, actualPrice);
+        pub.order(Menu.STRONGBROW, 1, Discount.NO_DISCOUNT);
+        assertEquals(110, pub.computeBill());
     }
 
     @Test
     @DisplayName("When we order a gin and tonic, then the price is 115 kr.")
     public void testACocktail() {
-        float actualPrice = pub.computeCost(Map.of(Menu.GT, 1), false);
-        assertEquals(115, actualPrice);
+        pub.order(Menu.GT, 1, Discount.NO_DISCOUNT);
+        assertEquals(115, pub.computeBill());
     }
 
     @Test
     @DisplayName("When we order a bacardi special, then the price is 127 kr.")
     public void testBacardiSpecial() {
-        float actualPrice = pub.computeCost(Map.of(Menu.BACARDI_SPECIAL, 1), false);
-        assertEquals(127, actualPrice);
+        pub.order(Menu.BACARDI_SPECIAL, 1, Discount.NO_DISCOUNT);
+        assertEquals(127, pub.computeBill());
     }
 
     @Nested
@@ -62,22 +59,21 @@ public class PubPricesTest {
         @Test
         @DisplayName("When they order a beer, then they get a discount.")
         public void testStudentsGetADiscountForBeer() {
-            float actualPrice = pub.computeCost(Map.of(Menu.HANSA, 1), true);
-            assertEquals(67, actualPrice);
+            pub.order(Menu.HANSA, 1, Discount.STUDENT_DISCOUNT);
+            assertEquals(67, pub.computeBill());
         }
 
         @Test
         @DisplayName("When they order multiple beers, they also get a discount.")
         public void testStudentsGetDiscountsWhenOrderingMoreThanOneBeer() {
-            float actualPrice = pub.computeCost(Map.of(Menu.HANSA, 2), true);
-            assertEquals(67 * 2, actualPrice);
+            pub.order(Menu.HANSA, 2, Discount.STUDENT_DISCOUNT);
+            assertEquals(67 * 2, pub.computeBill());
         }
 
         @Test
         @DisplayName("When they order a cocktail, they do not get a discount.")
         public void testStudentsDoNotGetDiscountsForCocktails() {
-            float actualPrice = pub.computeCost(Map.of(Menu.GT, 1), true);
-            assertEquals(115, actualPrice);
+            assertThrows(RuntimeException.class, () -> pub.order(Menu.GT, 1, Discount.STUDENT_DISCOUNT));
         }
     }
 
@@ -87,13 +83,26 @@ public class PubPricesTest {
         @Test
         @DisplayName("and the order is for cocktails, then they are refused.")
         public void testCanBuyAtMostTwoDrinksInOneGo() {
-            assertThrows(RuntimeException.class, () -> pub.computeCost(Map.of(Menu.BACARDI_SPECIAL, 3), false));
+            assertThrows(RuntimeException.class, () -> pub.order(Menu.BACARDI_SPECIAL, 3, Discount.NO_DISCOUNT));
         }
 
         @Test
         @DisplayName("and the order is for beers, then they are served.")
         public void testCanOrderMoreThanTwoBeers() {
-            pub.computeCost(Map.of(Menu.HANSA, 5), false);
+            pub.order(Menu.HANSA, 5, Discount.NO_DISCOUNT);
+            assertEquals(Menu.HANSA.getPrice() * 5, pub.computeBill());
+        }
+    }
+
+    @Nested
+    @DisplayName("Add tips")
+    class Tips {
+        @Test
+        @DisplayName("Add tips to cost of one beer")
+        public void testCanAddTips() {
+            int tips = 20;
+            pub.order(Menu.HANSA, 1, Discount.NO_DISCOUNT);
+            assertEquals(Menu.HANSA.getPrice() + tips, pub.addTips(pub.computeBill(), tips));
         }
     }
 }
