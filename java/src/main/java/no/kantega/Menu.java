@@ -1,7 +1,7 @@
 package no.kantega;
 
 public enum Menu {
-    RUM("Unknown", Type.INGREDIENT, 65),
+    RUM("Rum", Type.INGREDIENT, 65),
     GRENADINE("Grenadine", Type.INGREDIENT, 10),
     LIME_JUICE("Lime Juice", Type.INGREDIENT,10),
     GREEN_STUFF("Green Stuff", Type.INGREDIENT,10),
